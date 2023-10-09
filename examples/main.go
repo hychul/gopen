@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	gopen "github.com/hychul/gopen"
+)
 
 func main() {
-	fmt.Println("Hello World!")
+	gopen.Run()
 }
