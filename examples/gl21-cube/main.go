@@ -22,8 +22,6 @@ import (
 const width, height = 800, 600
 
 var (
-	texture uint32
-
 	rotationX float32
 	rotationY float32
 
@@ -61,12 +59,12 @@ func main() {
 	fmt.Println("OpenGL version", version)
 
 	// Load the texture
-	texture = newTexture("square.png")
+	texture := newTexture("square.png")
 	defer gl.DeleteTextures(1, &texture)
 
 	setupScene()
 	for !window.ShouldClose() {
-		drawScene()
+		drawScene(texture)
 
 		// Maintenance
 		window.SwapBuffers()
@@ -142,7 +140,7 @@ func setupScene() {
 	gl.LoadIdentity()
 }
 
-func drawScene() {
+func drawScene(texture uint32) {
 	// Update
 	time := glfw.GetTime()
 	elapsed := time - previousTime
