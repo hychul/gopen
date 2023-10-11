@@ -121,8 +121,9 @@ func makeVao(points []float32) uint32 {
 	var vao uint32 // Vertex Array Object
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
+
+	// Enable vertex attribute and use points FLOAT array group by number of 3 as coords
 	gl.EnableVertexAttribArray(0)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
 
 	return vao
