@@ -6,6 +6,7 @@
 package main // import "github.com/go-gl/example/gl21-cube"
 
 import (
+	"fmt"
 	"go/build"
 	"image"
 	"image/draw"
@@ -18,13 +19,16 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
+const width, height = 800, 600
+
 var (
-	texture   uint32
+	texture uint32
+
 	rotationX float32
 	rotationY float32
-)
 
-const width, height = 800, 600
+	previousTime float64
+)
 
 func init() {
 	// GLFW event handling must run on the main OS thread
@@ -38,6 +42,7 @@ func main() {
 	defer glfw.Terminate()
 
 	glfw.WindowHint(glfw.Resizable, glfw.False)
+	// Set GL version
 	glfw.WindowHint(glfw.ContextVersionMajor, 2)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 	window, err := glfw.CreateWindow(width, height, "Cube", nil, nil)
@@ -46,16 +51,24 @@ func main() {
 	}
 	window.MakeContextCurrent()
 
+	// Initialize Gl
 	if err := gl.Init(); err != nil {
 		panic(err)
 	}
 
+	// Log GL version
+	version := gl.GoStr(gl.GetString(gl.VERSION))
+	fmt.Println("OpenGL version", version)
+
+	// Load the texture
 	texture = newTexture("square.png")
 	defer gl.DeleteTextures(1, &texture)
 
 	setupScene()
 	for !window.ShouldClose() {
 		drawScene()
+
+		// Maintenance
 		window.SwapBuffers()
 		glfw.PollEvents()
 	}
@@ -100,6 +113,12 @@ func newTexture(file string) uint32 {
 }
 
 func setupScene() {
+	// Setup variables
+	previousTime = glfw.GetTime()
+	rotationX = 0
+	rotationY = 0
+
+	// Configure global settings
 	gl.Enable(gl.DEPTH_TEST)
 	gl.Enable(gl.LIGHTING)
 
@@ -124,6 +143,15 @@ func setupScene() {
 }
 
 func drawScene() {
+	// Update
+	time := glfw.GetTime()
+	elapsed := time - previousTime
+	previousTime = time
+
+	rotationX += float32(elapsed) * 50
+	rotationY += float32(elapsed) * 50
+
+	// Render
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	gl.MatrixMode(gl.MODELVIEW)
@@ -131,9 +159,6 @@ func drawScene() {
 	gl.Translatef(0, 0, -3.0)
 	gl.Rotatef(rotationX, 1, 0, 0)
 	gl.Rotatef(rotationY, 0, 1, 0)
-
-	rotationX += 0.5
-	rotationY += 0.5
 
 	gl.BindTexture(gl.TEXTURE_2D, texture)
 
