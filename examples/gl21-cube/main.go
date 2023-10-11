@@ -43,7 +43,7 @@ func main() {
 	// Set GL version
 	glfw.WindowHint(glfw.ContextVersionMajor, 2)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
-	window, err := glfw.CreateWindow(width, height, "Cube", nil, nil)
+	window, err := glfw.CreateWindow(width, height, "OpenGL 2.1 Cube", nil, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -67,8 +67,8 @@ func main() {
 		drawScene(texture)
 
 		// Maintenance
-		window.SwapBuffers()
 		glfw.PollEvents()
+		window.SwapBuffers()
 	}
 }
 

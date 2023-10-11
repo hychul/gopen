@@ -109,16 +109,8 @@ var (
 		1.0, 1.0, 1.0, 0.0, 1.0,
 	}
 
-	program uint32
-
-	model        mgl32.Mat4
 	modelUniform int32
-
-	vao uint32
-
-	texture uint32
-
-	angle float64
+	angle        float64
 
 	previousTime float64
 )
@@ -140,7 +132,7 @@ func main() {
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-	window, err := glfw.CreateWindow(windowWidth, windowHeight, "Cube", nil, nil)
+	window, err := glfw.CreateWindow(windowWidth, windowHeight, "OpenGL 4.1 Cube", nil, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -155,25 +147,28 @@ func main() {
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	fmt.Println("OpenGL version", version)
 
-	// Configure the vertex and fragment shaders
-	program, err = newProgram(vertexShader, fragmentShader)
-	if err != nil {
-		panic(err)
-	}
-
 	// Load the texture
-	texture, err = newTexture("square.png")
+	texture, err := newTexture("square.png")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	setupScene()
+	// Configure the vertex and fragment shaders
+	program, err := newProgram(vertexShader, fragmentShader)
+	if err != nil {
+		panic(err)
+	}
+
+	// Create vao
+	vao := makeVao(cubeVertices, program)
+
+	setupScene(program)
 	for !window.ShouldClose() {
-		drawScene()
+		drawScene(vao, program, texture)
 
 		// Maintenance
-		window.SwapBuffers()
 		glfw.PollEvents()
+		window.SwapBuffers()
 	}
 }
 
@@ -273,40 +268,19 @@ func newTexture(file string) (uint32, error) {
 	return texture, nil
 }
 
-func setupScene() {
-	// Setup variables
-	previousTime = glfw.GetTime()
-	angle = 0.0
-
-	// Configure the shader program
-	gl.UseProgram(program)
-
-	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
-	projectionUniform := gl.GetUniformLocation(program, gl.Str("projection\x00"))
-	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
-
-	camera := mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	cameraUniform := gl.GetUniformLocation(program, gl.Str("camera\x00"))
-	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
-
-	model = mgl32.Ident4()
-	modelUniform = gl.GetUniformLocation(program, gl.Str("model\x00"))
-	gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
-
-	textureUniform := gl.GetUniformLocation(program, gl.Str("tex\x00"))
-	gl.Uniform1i(textureUniform, 0)
-
-	gl.BindFragDataLocation(program, 0, gl.Str("outputColor\x00"))
-
-	// Configure the vertex data
-	gl.GenVertexArrays(1, &vao)
-	gl.BindVertexArray(vao)
-
+func makeVao(points []float32, program uint32) uint32 {
+	// Vertex Buffer Object
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(cubeVertices)*4, gl.Ptr(cubeVertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(points)*4, gl.Ptr(points), gl.STATIC_DRAW)
 
+	// Vertex Array Object
+	var vao uint32
+	gl.GenVertexArrays(1, &vao)
+	gl.BindVertexArray(vao)
+
+	// Configure vertex and texCoord attribute instead of gl.EnableVertexAttrib() method. (0: vertAttrib, 1: texCoordAttrib)
 	vertAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
 	gl.VertexAttribPointerWithOffset(vertAttrib, 3, gl.FLOAT, false, 5*4, 0)
@@ -315,13 +289,43 @@ func setupScene() {
 	gl.EnableVertexAttribArray(texCoordAttrib)
 	gl.VertexAttribPointerWithOffset(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 3*4)
 
+	return vao
+}
+
+func setupScene(program uint32) {
+	// Setup variables
+	previousTime = glfw.GetTime()
+	angle = 0.0
+
+	// Configure the shader program to use variables in shaders
+	gl.UseProgram(program)
+
+	// Configure variables in vertex shader : projection, camera, model
+	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
+	projectionUniform := gl.GetUniformLocation(program, gl.Str("projection\x00"))
+	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
+
+	camera := mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	cameraUniform := gl.GetUniformLocation(program, gl.Str("camera\x00"))
+	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
+
+	model := mgl32.Ident4()
+	modelUniform = gl.GetUniformLocation(program, gl.Str("model\x00"))
+	gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
+
+	// Configure variables in fragment shader : tex, outputColor
+	textureUniform := gl.GetUniformLocation(program, gl.Str("tex\x00"))
+	gl.Uniform1i(textureUniform, 0)
+
+	gl.BindFragDataLocation(program, 0, gl.Str("outputColor\x00"))
+
 	// Configure global settings
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LESS)
 	gl.ClearColor(1.0, 1.0, 1.0, 1.0)
 }
 
-func drawScene() {
+func drawScene(vao uint32, program uint32, texture uint32) {
 	// Update
 	time := glfw.GetTime()
 	elapsed := time - previousTime
@@ -329,7 +333,7 @@ func drawScene() {
 
 	angle += elapsed
 
-	model = mgl32.HomogRotate3D(float32(angle), mgl32.Vec3{0, 1, 0})
+	model := mgl32.HomogRotate3D(float32(angle), mgl32.Vec3{0, 1, 0})
 
 	// Render
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
