@@ -22,6 +22,8 @@ import (
 )
 
 const (
+	float32Size = 4
+
 	windowWidth, windowHeight = 800, 600
 
 	vertexShader = `
@@ -283,11 +285,11 @@ func makeVao(points []float32, program uint32) uint32 {
 	// Configure vertex and texCoord attribute instead of gl.EnableVertexAttrib() method. (0: vertAttrib, 1: texCoordAttrib)
 	vertAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointerWithOffset(vertAttrib, 3, gl.FLOAT, false, 5*4, 0)
+	gl.VertexAttribPointerWithOffset(vertAttrib, 3, gl.FLOAT, false, 5*float32Size, 0)
 
 	texCoordAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointerWithOffset(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 3*4)
+	gl.VertexAttribPointerWithOffset(texCoordAttrib, 2, gl.FLOAT, false, 5*float32Size, 3*float32Size)
 
 	return vao
 }
