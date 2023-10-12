@@ -147,7 +147,7 @@ func main() {
 
 	// Log GL version
 	version := gl.GoStr(gl.GetString(gl.VERSION))
-	fmt.Println("OpenGL version", version)
+	log.Println("OpenGL version", version)
 
 	// Load the texture
 	texture, err := newTexture("square.png")

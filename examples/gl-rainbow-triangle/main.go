@@ -60,7 +60,14 @@ func main() {
 	window := initGlfw()
 	defer glfw.Terminate()
 
-	program := initOpenGL()
+	if err := gl.Init(); err != nil {
+		panic(err)
+	}
+
+	version := gl.GoStr(gl.GetString(gl.VERSION))
+	log.Println("OpenGL version", version)
+
+	program := newProgram(vertexShaderSource, fragmentShaderSource)
 
 	vao := makeVao(triangle)
 
@@ -93,14 +100,8 @@ func initGlfw() *glfw.Window {
 	return window
 }
 
-// initOpenGL initializes OpenGL and returns an intiialized program.
-func initOpenGL() uint32 {
-	if err := gl.Init(); err != nil {
-		panic(err)
-	}
-	version := gl.GoStr(gl.GetString(gl.VERSION))
-	log.Println("OpenGL version", version)
-
+// newProgram initializes OpenGL and returns an intiialized program.
+func newProgram(vertexShaderSource, fragmentShaderSource string) uint32 {
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
@@ -114,28 +115,11 @@ func initOpenGL() uint32 {
 	gl.AttachShader(prog, vertexShader)
 	gl.AttachShader(prog, fragmentShader)
 	gl.LinkProgram(prog)
+
+	gl.DeleteShader(vertexShader)
+	gl.DeleteShader(fragmentShader)
+
 	return prog
-}
-
-// makeVao initializes and returns a vertex array from the points provided.
-func makeVao(points []float32) uint32 {
-	var vbo uint32 // Vertex Buffer Object
-	gl.GenBuffers(1, &vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
-
-	var vao uint32 // Vertex Array Object
-	gl.GenVertexArrays(1, &vao)
-	gl.BindVertexArray(vao)
-
-	// Enable vertex attribute and use points FLOAT array group by number of 3 as coords
-	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 6*float32Size, 0)
-
-	gl.EnableVertexAttribArray(1)
-	gl.VertexAttribPointerWithOffset(1, 3, gl.FLOAT, false, 6*float32Size, 3*float32Size)
-
-	return vao
 }
 
 func compileShader(source string, shaderType uint32) (uint32, error) {
@@ -159,6 +143,27 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 	}
 
 	return shader, nil
+}
+
+// makeVao initializes and returns a vertex array from the points provided.
+func makeVao(points []float32) uint32 {
+	var vbo uint32 // Vertex Buffer Object
+	gl.GenBuffers(1, &vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
+
+	var vao uint32 // Vertex Array Object
+	gl.GenVertexArrays(1, &vao)
+	gl.BindVertexArray(vao)
+
+	// Enable vertex attribute and use points FLOAT array group by number of 3 as coords
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 6*float32Size, 0)
+
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointerWithOffset(1, 3, gl.FLOAT, false, 6*float32Size, 3*float32Size)
+
+	return vao
 }
 
 func drawTriangle(vao uint32, program uint32) {
