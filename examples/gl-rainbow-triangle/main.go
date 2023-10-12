@@ -46,7 +46,7 @@ const (
 )
 
 var (
-	triangle = []float32{
+	triangleVertices = []float32{
 		//  X, Y, Z, R, G, B
 		0, 0.5, 0, 1, 0, 0, // top
 		-0.5, -0.5, 0, 0, 1, 0, // left
@@ -69,7 +69,7 @@ func main() {
 
 	program := newProgram(vertexShaderSource, fragmentShaderSource)
 
-	vao := makeVao(triangle)
+	vao := makeVao(triangleVertices)
 
 	for !window.ShouldClose() {
 		drawTriangle(vao, program)
@@ -172,5 +172,5 @@ func drawTriangle(vao uint32, program uint32) {
 	gl.UseProgram(program)
 
 	gl.BindVertexArray(vao)
-	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(triangle)/3))
+	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(triangleVertices)/3))
 }
