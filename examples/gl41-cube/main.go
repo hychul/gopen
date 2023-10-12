@@ -25,7 +25,7 @@ const (
 	windowWidth, windowHeight = 800, 600
 
 	vertexShader = `
-#version 330
+#version 410
 
 uniform mat4 projection;
 uniform mat4 camera;
@@ -43,7 +43,7 @@ void main() {
 ` + "\x00"
 
 	fragmentShader = `
-#version 330
+#version 410
 
 uniform sampler2D tex;
 
