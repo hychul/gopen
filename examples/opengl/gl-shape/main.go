@@ -72,7 +72,7 @@ func main() {
 	vao := makeVao(triangleVertices)
 
 	for !window.ShouldClose() {
-		drawTriangle(vao, program)
+		draw(vao, program)
 
 		glfw.PollEvents()
 		window.SwapBuffers()
@@ -166,7 +166,7 @@ func makeVao(points []float32) uint32 {
 	return vao
 }
 
-func drawTriangle(vao uint32, program uint32) {
+func draw(vao uint32, program uint32) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	gl.UseProgram(program)
