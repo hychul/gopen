@@ -5,10 +5,8 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
-	"os"
 	"runtime"
 	"time"
 	"unsafe"
@@ -25,7 +23,49 @@ const (
 
 	windowTitle = "Metal Rainbow Triangle"
 
-	width, height = 800, 600
+	windowWidth, windowHeight = 800, 600
+
+	metalShaderSource = `
+    #include <metal_stdlib>
+
+    using namespace metal;
+
+    struct Vertex {
+        float4 position [[position]];
+        float4 color;
+    };
+
+    vertex Vertex VertexShader(
+        uint vertexID [[vertex_id]],
+        device Vertex * vertices [[buffer(0)]],
+        constant int2 * windowSize [[buffer(1)]],
+        constant float2 * pos [[buffer(2)]]
+    ) {
+        Vertex out = vertices[vertexID];
+        out.position.xy += *pos;
+        float2 viewportSize = float2(*windowSize);
+        out.position.xy = float2(-1 + out.position.x / (0.5 * viewportSize.x),
+                                1 - out.position.y / (0.5 * viewportSize.y));
+        return out;
+    }
+
+    fragment float4 FragmentShader(Vertex in [[stage_in]]) {
+        return in.color;
+    }
+    `
+)
+
+type Vertex struct {
+	Position f32.Vec4
+	Color    f32.Vec4
+}
+
+var (
+	vertices = [...]Vertex{
+		{f32.Vec4{0, -100, 0, 1}, f32.Vec4{1, 0, 0, 1}},
+		{f32.Vec4{-100, 100, 0, 1}, f32.Vec4{0, 1, 0, 1}},
+		{f32.Vec4{100, 100, 0, 1}, f32.Vec4{0, 0, 1, 1}},
+	}
 )
 
 func init() {
@@ -33,12 +73,6 @@ func init() {
 }
 
 func main() {
-	flag.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: movingtriangle")
-		flag.PrintDefaults()
-	}
-	flag.Parse()
-
 	err := run()
 	if err != nil {
 		log.Fatalln(err)
@@ -52,6 +86,7 @@ func run() error {
 	}
 	fmt.Println("Metal device:", device.Name)
 
+	// GLFW setting
 	err = glfw.Init()
 	if err != nil {
 		return err
@@ -59,12 +94,13 @@ func run() error {
 	defer glfw.Terminate()
 
 	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
-	window, err := glfw.CreateWindow(640, 480, "Metal Example", nil, nil)
+	window, err := glfw.CreateWindow(windowWidth, windowHeight, windowTitle, nil, nil)
 	if err != nil {
 		return err
 	}
 	defer window.Destroy()
 
+	// Metal setting
 	ml := coreanim.MakeMetalLayer()
 	ml.SetDevice(device)
 	ml.SetPixelFormat(mtl.PixelFormatBGRA8UNorm)
@@ -75,11 +111,11 @@ func run() error {
 	cv.SetLayer(ml)
 	cv.SetWantsLayer(true)
 
-	// Set callbacks.
+	// Set window callbacks
 	window.SetFramebufferSizeCallback(func(_ *glfw.Window, width, height int) {
 		ml.SetDrawableSize(width, height)
 	})
-	var windowSize = [2]int32{640, 480}
+	var windowSize = [2]int32{windowWidth, windowHeight}
 	window.SetSizeCallback(func(_ *glfw.Window, width, height int) {
 		windowSize[0], windowSize[1] = int32(width), int32(height)
 	})
@@ -88,35 +124,8 @@ func run() error {
 		pos[0], pos[1] = float32(x), float32(y)
 	})
 
-	// Create a render pipeline state.
-	const source = `#include <metal_stdlib>
-
-using namespace metal;
-
-struct Vertex {
-	float4 position [[position]];
-	float4 color;
-};
-
-vertex Vertex VertexShader(
-	uint vertexID [[vertex_id]],
-	device Vertex * vertices [[buffer(0)]],
-	constant int2 * windowSize [[buffer(1)]],
-	constant float2 * pos [[buffer(2)]]
-) {
-	Vertex out = vertices[vertexID];
-	out.position.xy += *pos;
-	float2 viewportSize = float2(*windowSize);
-	out.position.xy = float2(-1 + out.position.x / (0.5 * viewportSize.x),
-	                          1 - out.position.y / (0.5 * viewportSize.y));
-	return out;
-}
-
-fragment float4 FragmentShader(Vertex in [[stage_in]]) {
-	return in.color;
-}
-`
-	lib, err := device.MakeLibrary(source, mtl.CompileOptions{})
+	// Compile shader
+	lib, err := device.MakeLibrary(metalShaderSource, mtl.CompileOptions{})
 	if err != nil {
 		return err
 	}
@@ -137,38 +146,29 @@ fragment float4 FragmentShader(Vertex in [[stage_in]]) {
 		return err
 	}
 
-	// Create a vertex buffer.
-	type Vertex struct {
-		Position f32.Vec4
-		Color    f32.Vec4
-	}
-	vertexData := [...]Vertex{
-		{f32.Vec4{0, 0, 0, 1}, f32.Vec4{1, 0, 0, 1}},
-		{f32.Vec4{300, 100, 0, 1}, f32.Vec4{0, 1, 0, 1}},
-		{f32.Vec4{0, 100, 0, 1}, f32.Vec4{0, 0, 1, 1}},
-	}
-	vertexBuffer := device.MakeBuffer(unsafe.Pointer(&vertexData[0]), unsafe.Sizeof(vertexData), mtl.ResourceStorageModeManaged)
+	// Make vertex buffer
+	vertexBuffer := device.MakeBuffer(unsafe.Pointer(&vertices[0]), unsafe.Sizeof(vertices), mtl.ResourceStorageModeManaged)
 
+	// Create MTL command queue
 	cq := device.MakeCommandQueue()
 
-	frame := startFPSCounter()
+	fpsCounter := startFPSCounter()
 
 	for !window.ShouldClose() {
-		glfw.PollEvents()
-
-		// Create a drawable to render into.
+		// Create a drawable to render into
 		drawable, err := ml.NextDrawable()
 		if err != nil {
-			return err
+			panic(err)
 		}
 
+		// Create command buffer
 		cb := cq.MakeCommandBuffer()
 
-		// Encode all render commands.
+		// Encode all render commands
 		var rpd mtl.RenderPassDescriptor
 		rpd.ColorAttachments[0].LoadAction = mtl.LoadActionClear
 		rpd.ColorAttachments[0].StoreAction = mtl.StoreActionStore
-		rpd.ColorAttachments[0].ClearColor = mtl.ClearColor{Red: 0.35, Green: 0.65, Blue: 0.85, Alpha: 1}
+		rpd.ColorAttachments[0].ClearColor = mtl.ClearColor{Red: 0, Green: 0, Blue: 0, Alpha: 1}
 		rpd.ColorAttachments[0].Texture = drawable.Texture()
 		rce := cb.MakeRenderCommandEncoder(rpd)
 		rce.SetRenderPipelineState(rps)
@@ -178,10 +178,15 @@ fragment float4 FragmentShader(Vertex in [[stage_in]]) {
 		rce.DrawPrimitives(mtl.PrimitiveTypeTriangle, 0, 3)
 		rce.EndEncoding()
 
+		// Commit command
 		cb.PresentDrawable(drawable)
 		cb.Commit()
 
-		frame <- struct{}{}
+		// Count frame
+		fpsCounter <- struct{}{}
+
+		// Poll window events
+		glfw.PollEvents()
 	}
 
 	return nil
