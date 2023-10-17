@@ -152,7 +152,7 @@ func run() error {
 	// Create MTL command queue
 	cq := device.MakeCommandQueue()
 
-	fpsCounter := startFPSCounter()
+	fpsCounter := makeFPSCounter()
 
 	for !window.ShouldClose() {
 		// Create a drawable to render into
@@ -192,7 +192,7 @@ func run() error {
 	return nil
 }
 
-func startFPSCounter() chan struct{} {
+func makeFPSCounter() chan struct{} {
 	frame := make(chan struct{}, 4)
 	go func() {
 		second := time.Tick(time.Second)
