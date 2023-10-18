@@ -9,7 +9,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/hychul/gopen/examples/metal/mtl"
+	"github.com/hychul/gopen/internal/graphics/metal/mtl"
 )
 
 func usage() {

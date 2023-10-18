@@ -12,9 +12,9 @@ import (
 	"unsafe"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/hychul/gopen/examples/metal/mtl"
-	"github.com/hychul/gopen/examples/metal/mtl/appkit"
-	"github.com/hychul/gopen/examples/metal/mtl/coreanim"
+	"github.com/hychul/gopen/internal/graphics/metal/appkit"
+	"github.com/hychul/gopen/internal/graphics/metal/coreanim"
+	"github.com/hychul/gopen/internal/graphics/metal/mtl"
 	"golang.org/x/image/math/f32"
 )
 

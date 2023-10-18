@@ -13,7 +13,7 @@ import (
 	"os"
 	"unsafe"
 
-	"github.com/hychul/gopen/examples/metal/mtl"
+	"github.com/hychul/gopen/internal/graphics/metal/mtl"
 	"golang.org/x/image/math/f32"
 )
 

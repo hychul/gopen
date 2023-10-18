@@ -11,7 +11,7 @@ package appkit
 import (
 	"unsafe"
 
-	"github.com/hychul/gopen/examples/metal/mtl/coreanim"
+	"github.com/hychul/gopen/internal/graphics/metal/coreanim"
 )
 
 /*
