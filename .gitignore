@@ -23,3 +23,5 @@ go.work
 # OS generated file
 *.DS_Store
 
+# IDEA
+.vscode
