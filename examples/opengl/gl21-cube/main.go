@@ -229,7 +229,7 @@ func drawScene(texture uint32) {
 
 // Set the working directory to the root of Go package, so that its assets can be accessed.
 func init() {
-	dir, err := importPathToDir("github.com/hychul/gopen/examples/gl21-cube")
+	dir, err := importPathToDir("github.com/hychul/gopen/examples/opengl/gl21-cube")
 	if err != nil {
 		log.Fatalln("Unable to find Go package in your GOPATH, it's needed to load assets:", err)
 	}
