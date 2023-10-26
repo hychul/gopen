@@ -276,7 +276,7 @@ func run() error {
 		rce.SetVertexBytes(unsafe.Pointer(&windowSize[0]), unsafe.Sizeof(windowSize), 1)
 		rce.SetVertexBytes(unsafe.Pointer(&pos[0]), unsafe.Sizeof(pos), 2)
 		rce.SetFragmentTexture(texture, 0)
-		rce.DrawIndexedPrimitives(mtl.PrimitiveTypeTriangle, len(indices), mtl.IndexTypeUInt16, indexBuffer, 0) // TODO
+		rce.DrawIndexedPrimitives(mtl.PrimitiveTypeTriangle, len(indices), mtl.IndexTypeUInt16, indexBuffer, 0)
 		rce.EndEncoding()
 
 		// Commit command
