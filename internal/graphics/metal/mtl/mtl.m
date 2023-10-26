@@ -161,10 +161,35 @@ void RenderCommandEncoder_SetVertexBytes(void * renderCommandEncoder, const void
 	                                                          atIndex:(NSUInteger)index];
 }
 
+void RenderCommandEncoder_SetFragmentBuffer(void * renderCommandEncoder, void * buffer, uint_t offset, uint_t index) {
+	[(id<MTLRenderCommandEncoder>)renderCommandEncoder setFragmentBuffer:(id<MTLBuffer>)buffer
+	                                                            offset:(NSUInteger)offset
+	                                                           atIndex:(NSUInteger)index];
+}
+
+void RenderCommandEncoder_SetFragmentBytes(void * renderCommandEncoder, const void * bytes, size_t length, uint_t index) {
+	[(id<MTLRenderCommandEncoder>)renderCommandEncoder setFragmentBytes:bytes
+	                                                             length:(NSUInteger)length
+	                                                            atIndex:(NSUInteger)index];
+}
+
+void RenderCommandEncoder_SetFragmentTexture(void * renderCommandEncoder, void * texture, uint_t index) {
+	[(id<MTLRenderCommandEncoder>)renderCommandEncoder setFragmentTexture:(id<MTLTexture>)texture
+	                                                              atIndex:(NSUInteger)index];
+}
+
 void RenderCommandEncoder_DrawPrimitives(void * renderCommandEncoder, uint8_t primitiveType, uint_t vertexStart, uint_t vertexCount) {
 	[(id<MTLRenderCommandEncoder>)renderCommandEncoder drawPrimitives:(MTLPrimitiveType)primitiveType
 	                                                      vertexStart:(NSUInteger)vertexStart
 	                                                      vertexCount:(NSUInteger)vertexCount];
+}
+
+void RenderCommandEncoder_DrawIndexedPrimitives(void * renderCommandEncoder, uint8_t primitiveType, uint_t indexCount, uint8_t indexType, void * indexBuffer, uint_t indexBufferOffset) {
+	[(id<MTLRenderCommandEncoder>)renderCommandEncoder drawIndexedPrimitives:(MTLPrimitiveType)primitiveType
+	                                                              indexCount:(NSUInteger)indexCount
+	                                                               indexType:(MTLIndexType)indexType
+																 indexBuffer:(id<MTLBuffer>)indexBuffer
+														   indexBufferOffset:(NSUInteger)indexBufferOffset];
 }
 
 void BlitCommandEncoder_CopyFromTexture(void * blitCommandEncoder,

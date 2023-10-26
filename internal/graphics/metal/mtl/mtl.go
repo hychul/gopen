@@ -95,6 +95,19 @@ const (
 	PrimitiveTypeTriangleStrip PrimitiveType = 4
 )
 
+// IndexType options for the memory location and access permissions for a resource.
+//
+// Reference: https://developer.apple.com/documentation/metal/mtlstoragemode
+type IndexType uint8
+
+const (
+	// IndexTypeUInt16 is a 16-bit unsigned integer used as a primitive index.
+	IndexTypeUInt16 IndexType = 0
+
+	// IndexTypeUInt32 is a 32-bit unsigned integer used as a primitive index.
+	IndexTypeUInt32 IndexType = 1
+)
+
 // LoadAction defines actions performed at the start of a rendering pass
 // for a render command encoder.
 //
@@ -571,12 +584,39 @@ func (rce RenderCommandEncoder) SetVertexBytes(bytes unsafe.Pointer, length uint
 	C.RenderCommandEncoder_SetVertexBytes(rce.commandEncoder, bytes, C.size_t(length), C.uint_t(index))
 }
 
-// DrawPrimitives renders one instance of primitives using vertex data
-// in contiguous array elements.
+// SetFragmentBuffer assigns a buffer to an entry in the fragment shader argument table.
+//
+// Reference: https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515470-setfragmentbuffer
+func (rce RenderCommandEncoder) SetFragmentBuffer(buf Buffer, offset, index int) {
+	C.RenderCommandEncoder_SetFragmentBuffer(rce.commandEncoder, buf.buffer, C.uint_t(offset), C.uint_t(index))
+}
+
+// SetFragmentBytes creates a buffer from bytes and assigns it to an entry in the fragment shader argument table.
+//
+// Reference: https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1516192-setfragmentbytes
+func (rce RenderCommandEncoder) SetFragmentBytes(bytes unsafe.Pointer, length uintptr, index int) {
+	C.RenderCommandEncoder_SetFragmentBytes(rce.commandEncoder, bytes, C.size_t(length), C.uint_t(index))
+}
+
+// SetFragmentTexture assigns a texture to an entry in the fragment shader argument table.
+//
+// Reference: https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515390-setfragmenttexture
+func (rce RenderCommandEncoder) SetFragmentTexture(texture Texture, index int) {
+	C.RenderCommandEncoder_SetFragmentTexture(rce.commandEncoder, texture.texture, C.uint_t(index))
+}
+
+// DrawPrimitives renders one instance of primitives using vertex data in contiguous array elements.
 //
 // Reference: https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1516326-drawprimitives.
 func (rce RenderCommandEncoder) DrawPrimitives(typ PrimitiveType, vertexStart, vertexCount int) {
 	C.RenderCommandEncoder_DrawPrimitives(rce.commandEncoder, C.uint8_t(typ), C.uint_t(vertexStart), C.uint_t(vertexCount))
+}
+
+// DrawIndexedPrimitives encodes a draw command that renders an instance of a geometric primitive with indexed vertices.
+//
+// Reference: https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515542-drawindexedprimitives
+func (rce RenderCommandEncoder) DrawIndexedPrimitives(pTyp PrimitiveType, indexCnt int, iTyp IndexType, indexBuf Buffer, indexBufOffset int) {
+	C.RenderCommandEncoder_DrawIndexedPrimitives(rce.commandEncoder, C.uint8_t(pTyp), C.uint_t(indexCnt), C.uint8_t(iTyp), indexBuf.buffer, C.uint_t(indexBufOffset))
 }
 
 // BlitCommandEncoder is an encoder that specifies resource copy

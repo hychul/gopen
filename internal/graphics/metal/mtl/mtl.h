@@ -97,7 +97,11 @@ void CommandEncoder_EndEncoding(void * commandEncoder);
 void RenderCommandEncoder_SetRenderPipelineState(void * renderCommandEncoder, void * renderPipelineState);
 void RenderCommandEncoder_SetVertexBuffer(void * renderCommandEncoder, void * buffer, uint_t offset, uint_t index);
 void RenderCommandEncoder_SetVertexBytes(void * renderCommandEncoder, const void * bytes, size_t length, uint_t index);
+void RenderCommandEncoder_SetFragmentBuffer(void * renderCommandEncoder, void * buffer, uint_t offset, uint_t index);
+void RenderCommandEncoder_SetFragmentBytes(void * renderCommandEncoder, const void * bytes, size_t length, uint_t index);
+void RenderCommandEncoder_SetFragmentTexture(void * renderCommandEncoder, void * texture, uint_t index);
 void RenderCommandEncoder_DrawPrimitives(void * renderCommandEncoder, uint8_t primitiveType, uint_t vertexStart, uint_t vertexCount);
+void RenderCommandEncoder_DrawIndexedPrimitives(void * renderCommandEncoder, uint8_t primitiveType, uint_t indexCount, uint8_t indexType, void * indexBuffer, uint_t indexBufferOffset);
 
 void BlitCommandEncoder_CopyFromTexture(void * blitCommandEncoder,
 	void * srcTexture, uint_t srcSlice, uint_t srcLevel, struct Origin srcOrigin, struct Size srcSize,
