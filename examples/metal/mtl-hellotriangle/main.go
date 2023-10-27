@@ -39,26 +39,28 @@ func run() error {
 	}
 
 	// Create a render pipeline state.
-	const source = `#include <metal_stdlib>
+	const source = `
+	#include <metal_stdlib>
 
-using namespace metal;
+	using namespace metal;
 
-struct Vertex {
-	float4 position [[position]];
-	float4 color;
-};
+	struct Vertex {
+		float4 position [[position]];
+		float4 color;
+	};
 
-vertex Vertex VertexShader(
-	uint vertexID [[vertex_id]],
-	device Vertex * vertices [[buffer(0)]]
-) {
-	return vertices[vertexID];
-}
+	vertex Vertex VertexShader(
+		uint vertexID [[vertex_id]],
+		device Vertex * vertices [[buffer(0)]]
+	) {
+		return vertices[vertexID];
+	}
 
-fragment float4 FragmentShader(Vertex in [[stage_in]]) {
-	return in.color;
-}
-`
+	fragment float4 FragmentShader(Vertex in [[stage_in]]) {
+		return in.color;
+	}
+	`
+
 	lib, err := device.MakeLibrary(source, mtl.CompileOptions{})
 	if err != nil {
 		return err
