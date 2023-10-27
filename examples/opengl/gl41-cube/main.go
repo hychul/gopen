@@ -27,36 +27,36 @@ const (
 	windowWidth, windowHeight = 800, 600
 
 	vertexShader = `
-#version 410
+	#version 410
 
-uniform mat4 projection;
-uniform mat4 camera;
-uniform mat4 model;
+	uniform mat4 projection;
+	uniform mat4 camera;
+	uniform mat4 model;
 
-in vec3 vert;
-in vec2 vertTexCoord;
+	in vec3 vert;
+	in vec2 vertTexCoord;
 
-out vec2 fragTexCoord;
+	out vec2 fragTexCoord;
 
-void main() {
-    fragTexCoord = vertTexCoord;
-    gl_Position = projection * camera * model * vec4(vert, 1);
-}
-` + "\x00"
+	void main() {
+		fragTexCoord = vertTexCoord;
+		gl_Position = projection * camera * model * vec4(vert, 1);
+	}
+	` + "\x00"
 
 	fragmentShader = `
-#version 410
+	#version 410
 
-uniform sampler2D tex;
+	uniform sampler2D tex;
 
-in vec2 fragTexCoord;
+	in vec2 fragTexCoord;
 
-out vec4 outputColor;
+	out vec4 outputColor;
 
-void main() {
-    outputColor = texture(tex, fragTexCoord);
-}
-` + "\x00"
+	void main() {
+		outputColor = texture(tex, fragTexCoord);
+	}
+	` + "\x00"
 )
 
 var (

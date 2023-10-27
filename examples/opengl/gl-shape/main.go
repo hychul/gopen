@@ -31,7 +31,7 @@ const (
         gl_Position = vec4(position, 1.0);
         vertexColor = color;
     }
-` + "\x00"
+	` + "\x00"
 
 	fragmentShaderSource = `
     #version 410
@@ -42,7 +42,7 @@ const (
     void main() {
         fragColor = vec4(vertexColor, 1);
     }
-` + "\x00"
+	` + "\x00"
 )
 
 var (
