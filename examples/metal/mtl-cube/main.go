@@ -66,6 +66,7 @@ const (
     `
 )
 
+// To effectively leverage Metal's SIMD instructions, vertex float data is passed in multiples of 4
 type Vertex struct {
 	Position [4]float32 // x, y, z, w
 	Color    [4]float32 // r, g, b, a
