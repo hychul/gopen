@@ -71,13 +71,13 @@ type Vertex struct {
 
 var (
 	vertices = [...]Vertex{
-		//             X,    Y,    Z,    W              U, V
-		{[4]float32{-100, +100, 0.00, 1.00}, [4]float32{1, 0}}, // left-top
-		{[4]float32{-100, -100, 0.00, 1.00}, [4]float32{1, 1}}, // left-bottom
-		{[4]float32{+100, -100, 0.00, 1.00}, [4]float32{0, 1}}, // right-bottom
-		{[4]float32{+100, -100, 0.00, 1.00}, [4]float32{0, 1}}, // right-bottom
-		{[4]float32{+100, +100, 0.00, 1.00}, [4]float32{0, 0}}, // right-top
-		{[4]float32{-100, +100, 0.00, 1.00}, [4]float32{1, 0}}, // left-top
+		//             X,    Y,     Z,     W              U, V
+		{[4]float32{-100, +100, +0.00, +1.00}, [4]float32{1, 0}}, // left-top
+		{[4]float32{-100, -100, +0.00, +1.00}, [4]float32{1, 1}}, // left-bottom
+		{[4]float32{+100, -100, +0.00, +1.00}, [4]float32{0, 1}}, // right-bottom
+		{[4]float32{+100, -100, +0.00, +1.00}, [4]float32{0, 1}}, // right-bottom
+		{[4]float32{+100, +100, +0.00, +1.00}, [4]float32{0, 0}}, // right-top
+		{[4]float32{-100, +100, +0.00, +1.00}, [4]float32{1, 0}}, // left-top
 	}
 	// vertices = [...]float32{
 	//    X,    Y,    Z,    W, U, V, _, _
